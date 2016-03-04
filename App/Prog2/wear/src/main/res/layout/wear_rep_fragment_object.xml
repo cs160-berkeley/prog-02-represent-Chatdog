@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingTop="5dp">
+
+    <com.pkmmte.view.CircularImageView
+        android:layout_width="96dp"
+        android:layout_height="96dp"
+        android:id="@+id/repPicture"
+        android:src="@drawable/capitol"
+        app:border="true"
+        android:layout_gravity="center_horizontal"
+        app:border_color="#FFFFFFFF"
+        app:border_width="2dp"
+        app:shadow="true" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/repName"
+            android:textSize="16dp"
+            android:layout_gravity="center_horizontal" />
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/repParty"
+            android:textSize="14dp"
+            android:layout_gravity="center_horizontal" />
+
+    <com.pkmmte.view.CircularImageView
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:paddingTop="30dp"
+        android:id="@+id/voteButton"
+        android:src="@drawable/capitol"
+        app:border="true"
+        android:layout_gravity="center_horizontal"
+        app:border_color="#FFFF5050"
+        app:border_width="1dp"
+        app:shadow="true" />
+</LinearLayout>
