@@ -1,8 +1,11 @@
 # PROG 02: Represent!
 
 To use the app, enter a ZIP code to the text bar and press the Go Button. Alternatively, press the Detect My Location Button. Doing the former will return all the representatives and senators for your ZIP code, which may include more than one representative if the ZIP code covers multiple districts. Doing the latter will always return just three results every time. 
+
 After selecting the appropriate location, both devices will switch to the Congressional Screen, which displays representative information in a horizontal scroll view. You can swipe through the views to access different representatives. To get more information, you can either swipe up on the bottom More Info tab on the mobile device, or press the representative’s portrait on the wear device.
+
 You can also press the 2012 Election Button on the wear device to access your location’s voting results for the 2012 election. 
+
 The device also switches to a random location if the wear device detects multiple consecutive changes in acceleration (Note: Up to three changes in acceleration). It does this by randomly selecting from a list of county latitude/longitude data downloaded from a census website.
 ## Authors
 
