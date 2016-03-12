@@ -1,5 +1,7 @@
 package com.example.chatdog.prog2;
 
+import android.graphics.Bitmap;
+
 /**
  * Created by Chatdog on 3/3/2016.
  */
@@ -13,7 +15,7 @@ public class Representative {
     public String termEnd;
     public String committees;
     public String recentBills;
-    public int picture;
+    public Bitmap picture;
 
     public Representative(){
 

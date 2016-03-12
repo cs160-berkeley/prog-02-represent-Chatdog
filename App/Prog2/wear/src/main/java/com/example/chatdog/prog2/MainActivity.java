@@ -7,9 +7,17 @@ import android.support.v4.app.FragmentActivity;
 import android.support.wearable.view.WatchViewStub;
 import android.util.Log;
 
+import com.twitter.sdk.android.Twitter;
+import com.twitter.sdk.android.core.TwitterAuthConfig;
+import io.fabric.sdk.android.Fabric;
 import java.util.ArrayList;
 
 public class MainActivity extends FragmentActivity {
+
+    // Note: Your consumer key and secret should be obfuscated in your source code before shipping.
+    private static final String TWITTER_KEY = "5lZ9TNyphJlQylYiZ40ZWWbGf";
+    private static final String TWITTER_SECRET = "VMj6Xf0yFAyKVXrJ1XH1rTT1nbFpVWqkUPkhqu0CrbaA3kisay";
+
     static ArrayList<String> repPartyList;
     static ArrayList<String> repList;
     WearCollectionPagerAdapter myCollectionPagerAdapter;
@@ -21,6 +29,8 @@ public class MainActivity extends FragmentActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        TwitterAuthConfig authConfig = new TwitterAuthConfig(TWITTER_KEY, TWITTER_SECRET);
+        Fabric.with(this, new Twitter(authConfig));
         setContentView(R.layout.activity_main);
         repList = new ArrayList<String>();
         repPartyList = new ArrayList<String>();

@@ -4,7 +4,9 @@
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:paddingTop="5dp">
+    android:paddingTop="5dp"
+    android:background="#3f51b5"
+    android:weightSum="1">
 
     <com.pkmmte.view.CircularImageView
         android:layout_width="96dp"
@@ -13,32 +15,46 @@
         android:src="@drawable/capitol"
         app:border="true"
         android:layout_gravity="center_horizontal"
-        app:border_color="#FFFFFFFF"
+        app:border_color="#e8eaf6"
         app:border_width="2dp"
-        app:shadow="true" />
+        app:shadow="true"
+        android:paddingBottom="35dp"
+        android:layout_marginBottom="5dp" />
 
-        <TextView
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:id="@+id/logoImage"
+        android:paddingLeft="20dp"
+        android:paddingRight="20dp"
+        android:paddingBottom="60dp" />
+
+
+    <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/repName"
             android:textSize="16dp"
-            android:layout_gravity="center_horizontal" />
+            android:layout_gravity="center_horizontal"
+        android:textColor="#ffffff" />
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/repParty"
             android:textSize="14dp"
-            android:layout_gravity="center_horizontal" />
+            android:layout_gravity="center_horizontal"
+            android:textColor="#ffffff" />
 
     <com.pkmmte.view.CircularImageView
         android:layout_width="40dp"
         android:layout_height="40dp"
         android:paddingTop="30dp"
         android:id="@+id/voteButton"
-        android:src="@drawable/capitol"
+        android:src="@drawable/vote2012_2"
         app:border="true"
         android:layout_gravity="center_horizontal"
-        app:border_color="#FFFF5050"
+        app:border_color="#e8eaf6"
         app:border_width="1dp"
         app:shadow="true" />
 </LinearLayout>

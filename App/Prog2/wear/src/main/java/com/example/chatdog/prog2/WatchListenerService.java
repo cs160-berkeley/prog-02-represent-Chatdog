@@ -54,6 +54,7 @@ public class WatchListenerService extends WearableListenerService {
                 for(int i = 0; i < numPics; i++) {
                     Asset pictureAsset = dataMapItem.getDataMap().getAsset("Image" + Integer.toString(i));
                     Bitmap bitmap = loadBitmapFromAsset(pictureAsset);
+                    bitmap = Bitmap.createBitmap(bitmap, 0, (bitmap.getHeight() - bitmap.getWidth()) / 3, bitmap.getWidth(), bitmap.getWidth());
                     String fileName = "im" + Integer.toString(i);
                     ByteArrayOutputStream bytes = new ByteArrayOutputStream();
                     bitmap.compress(Bitmap.CompressFormat.JPEG, 100, bytes);

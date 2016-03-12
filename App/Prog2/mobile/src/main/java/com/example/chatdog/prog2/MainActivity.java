@@ -4,6 +4,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
@@ -14,19 +15,40 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.EditText;
 
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.location.LocationServices;
+import com.twitter.sdk.android.Twitter;
+import com.twitter.sdk.android.core.TwitterAuthConfig;
+
+import org.json.JSONObject;
+
+import au.com.bytecode.opencsv.CSVReader;
+import io.fabric.sdk.android.Fabric;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Random;
-import java.util.Set;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements GoogleApiClient.ConnectionCallbacks{
+
+    // Note: Your consumer key and secret should be obfuscated in your source code before shipping.
+    private static final String TWITTER_KEY = "sYZQ7OMWRF8cfSAG5aXjW8qdG";
+    private static final String TWITTER_SECRET = "ZKR0XZL8m08EHNxwY7za0lHRKa9z1KkSs0ZVHX6q2QT2BEg3JJ";
+
     static int zip;
-    static String currLocation;
+    static Location currLocation;
     static ArrayList<Representative> repList;
-    static HashMap<String, Location> locTable;
-    static HashMap<Location, ArrayList<Representative>> repMapping;
     static boolean shakeFlag;
+    static JSONObject voteData;
+    ArrayList<String[]> coordinateList;
     BroadcastReceiver shakeReceiver;
+    GoogleApiClient mGoogleApiClient;
+
+    final static String sunlightAPIKey = "&apikey=12c5fc848624469092d79a7fd011cb76";
+    final static String googleGeocodeKey = "&key=AIzaSyCt74Kj6AaCHGODW-3LpAOF_jBaVt67ppk";
 
     private void sendInfo(){
         Intent sendIntent = new Intent(getBaseContext(), PhoneToWatchService.class);
@@ -38,49 +60,82 @@ public class MainActivity extends AppCompatActivity {
             r = repList.get(j);
             nameString += r.getTitle() + ";";
             partyString += r.party + ";";
-            picString += Integer.toString(r.picture) + ";";
         }
         sendIntent.putExtra("REP_INFO", nameString + "/" + partyString);
-        sendIntent.putExtra("REP_PIC", picString);
+        sendIntent.putExtra("NUM_PICS", repList.size());
         startService(sendIntent);
 
     }
 
     public void onShake(){
-        Set<String> locSet = locTable.keySet();
-        int choice = new Random().nextInt(locSet.size());
-        int count = 0;
-        for(String loc : locSet) {
-            if (count == choice) {
-                currLocation = loc;
-                break;
-            }
-            count++;
-        }
-        Log.d("T", "Switching to location " + currLocation);
-        getRepresentatives(currLocation);
-        Intent i = new Intent(MainActivity.this, SecondActivity.class);
+        int choice = new Random().nextInt(coordinateList.size());
+        String[] coordinate = coordinateList.get(choice);
+        String latitude = coordinate[0];
+        String longitude = coordinate[1];
+        getDataFromCoordinates(latitude, longitude);
+    }
+
+    protected void onNetworkingComplete(){
         sendInfo();
+        Intent i = new Intent(MainActivity.this, SecondActivity.class);
         startActivity(i);
     }
 
     public void goButtonOnClick(View v){
         zip = Integer.parseInt(((EditText) findViewById(R.id.zipCode)).getText().toString());
         if (checkZip()) {
-            currLocation = "Bradford, Florida";
-            getRepresentatives(currLocation);
-            Intent i = new Intent(MainActivity.this, SecondActivity.class);
-            sendInfo();
-            startActivity(i);
+            //currLocation = "Bradford, Florida";
+            //getRepresentatives(currLocation);
+
+            repList.clear();
+            String domain = "https://congress.api.sunlightfoundation.com";
+            String request = "/legislators/locate?zip=" + Integer.toString(zip);
+            String geocodeRequest = "https://maps.googleapis.com/maps/api/geocode/json?components=postal_code:" + Integer.toString(zip);
+            URL url = null;
+            URL gcURL = null;
+            try{
+                url = new URL(domain + request + sunlightAPIKey);
+                gcURL = new URL(geocodeRequest + googleGeocodeKey);
+
+            } catch(Exception e) {
+                e.printStackTrace();
+            }
+            new SunLightAPICall(this).execute(url, gcURL);
         }
     }
 
     public void detectLocationButtonOnClick(View v){
-        currLocation = "Alameda, California";
-        getRepresentatives(currLocation);
-        Intent i = new Intent(MainActivity.this, SecondActivity.class);
-        startActivity(i);
-        sendInfo();
+        try {
+            android.location.Location mLastLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
+            if (mLastLocation == null) {
+                Log.d("Error", "Last location is null");
+                return;
+            }
+            String latitude = String.valueOf(mLastLocation.getLatitude());
+            String longitude = String.valueOf(mLastLocation.getLongitude());
+            Log.d("Location", "Latitude is " + latitude + " Longitude is " + longitude);
+            getDataFromCoordinates(latitude, longitude);
+
+        } catch(SecurityException e) {
+            e.printStackTrace();
+        } catch(Exception e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    private void getDataFromCoordinates(String latitude, String longitude){
+        repList.clear();
+        try {
+            String domain = "https://congress.api.sunlightfoundation.com";
+            String request = "/legislators/locate?latitude=" + latitude + "&longitude=" + longitude;
+            String geocodeRequest = "https://maps.googleapis.com/maps/api/geocode/json?latlng=" + latitude + "," + longitude;
+            URL url = new URL(domain + request + sunlightAPIKey);
+            URL gcURL = new URL(geocodeRequest + googleGeocodeKey);
+            new SunLightAPICall(this).execute(url, gcURL);
+        } catch(Exception e) {
+            e.printStackTrace();
+        }
     }
 
     protected boolean checkZip(){
@@ -88,23 +143,49 @@ public class MainActivity extends AppCompatActivity {
         return true;
     }
 
-
-
-    protected void getRepresentatives(String location){
-        repList.clear();
-        Location l = locTable.get(location);
-        ArrayList<Representative> reps = repMapping.get(l);
-        for(int i = 0; i < reps.size(); i++){
-            repList.add(reps.get(i));
-        }
-    }
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        TwitterAuthConfig authConfig = new TwitterAuthConfig(TWITTER_KEY, TWITTER_SECRET);
+        Fabric.with(this, new Twitter(authConfig));
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        coordinateList = new ArrayList<String[]>();
+
+        if (mGoogleApiClient == null) {
+            mGoogleApiClient = new GoogleApiClient.Builder(this)
+                    .addConnectionCallbacks(this)
+                    .addApi(LocationServices.API)
+                    .build();
+        }
+
+        //code adapted from http://stackoverflow.com/questions/13814503/reading-a-json-file-in-android
+        String json = null;
+        try {
+            InputStream is = getAssets().open("newelectioncounty2012.json");
+            int size = is.available();
+            byte[] buffer = new byte[size];
+            is.read(buffer);
+            is.close();
+            json = new String(buffer, "UTF-8");
+            voteData = new JSONObject(json);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        try {
+            InputStream csvStream =  getAssets().open("coordinates.csv");
+            InputStreamReader csvStreamReader = new InputStreamReader(csvStream);
+            CSVReader csvReader = new CSVReader(csvStreamReader);
+            String[] line;
+            while ((line = csvReader.readNext()) != null) {
+                coordinateList.add(line);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
         shakeReceiver = new BroadcastReceiver() {
             @Override
@@ -114,109 +195,12 @@ public class MainActivity extends AppCompatActivity {
         };
         shakeFlag = false;
         repList = new ArrayList<Representative>();
-        locTable = new HashMap<String, Location>();
-        repMapping = new HashMap<Location, ArrayList<Representative>>();
-
-        Location l1 = new Location();
-        l1.name = "Alameda, California";
-        l1.obamaVote = 78.9;
-        l1.romneyVote = 18.2;
-        locTable.put("Alameda, California", l1);
-
-        Location l2 = new Location();
-        l2.name = "Bradford, Florida";
-        l2.obamaVote = 28.5;
-        l2.romneyVote = 70.5;
-        locTable.put("Bradford, Florida", l2);
-
-        ArrayList<Representative> alamedaReps = new ArrayList<Representative>();
-        Representative r1 = new Representative();
-        r1.name = "Barbara Boxer";
-        r1.position = "Senator";
-        r1.party = "Democratic Party";
-        r1.email = "Email: Barbara Boxer's Email";
-        r1.website = "Website: Barbara Boxer's Website";
-        r1.lastTweet = "Last Tweet: Barbara Boxer's Last Tweet";
-        r1.termEnd = "Term Ends: Barbara Boxer's Term End";
-        r1.committees = "Committees: \n    Committee 1\n    Committee 2\n    Committee 3";
-        r1.recentBills = "Recent Bills: \n    List of Recent Bills Here";
-        r1.picture = R.drawable.sen1apic;
-        alamedaReps.add(r1);
-
-        Representative r2 = new Representative();
-        r2.name = "Dianne Feinstein";
-        r2.position = "Senator";
-        r2.party = "Democratic Party";
-        r2.email = "Email: Dianne Feinstein's Email";
-        r2.website = "Website: Dianne Feinstein's Website";
-        r2.lastTweet = "Last Tweet: Dianne Feinstein's Last Tweet";
-        r2.termEnd = "Term Ends: Dianne Feinstein's Term End";
-        r2.committees = "Committees: \n    Committee 1\n    Committee 2\n    Committee 3";
-        r2.recentBills = "Recent Bills: \n    List of Recent Bills Here";
-        r2.picture = R.drawable.sen1bpic;
-        alamedaReps.add(r2);
-
-        Representative r3 = new Representative();
-        r3.name = "Eric Swalwell";
-        r3.position = "Representative";
-        r3.party = "Democratic Party";
-        r3.email = "Email: Eric Swalwell's Email";
-        r3.website = "Website: Eric Swalwell's Website";
-        r3.lastTweet = "Last Tweet: Eric Swalwell's Last Tweet";
-        r3.termEnd = "Term Ends: Eric Swalwell's Term End";
-        r3.committees = "Committees: \n    Committee 1\n    Committee 2\n    Committee 3";
-        r3.recentBills = "Recent Bills: \n    List of Recent Bills Here";
-        r3.picture = R.drawable.rep1pic;
-        alamedaReps.add(r3);
-
-        repMapping.put(l1, alamedaReps);
-
-        ArrayList<Representative> bradfordReps = new ArrayList<Representative>();
-        Representative r4 = new Representative();
-        r4.name = "Bill Nelson";
-        r4.position = "Senator";
-        r4.party = "Democratic Party";
-        r4.email = "Email: Bill Nelson's Email";
-        r4.website = "Website: Bill Nelson's Website";
-        r4.lastTweet = "Last Tweet: Bill Nelson's Last Tweet";
-        r4.termEnd = "Term Ends: Bill Nelson's Term End";
-        r4.committees = "Committees: \n    Committee 1\n    Committee 2\n    Committee 3";
-        r4.recentBills = "Recent Bills: \n    List of Recent Bills Here";
-        r4.picture = R.drawable.sen2apic;
-        bradfordReps.add(r4);
-
-        Representative r5 = new Representative();
-        r5.name = "Marco Rubio";
-        r5.position = "Senator";
-        r5.party = "Republican Party";
-        r5.email = "Email: Marco Rubio's Email";
-        r5.website = "Website: Marco Rubio's Website";
-        r5.lastTweet = "Last Tweet: Marco Rubio's Last Tweet";
-        r5.termEnd = "Term Ends: Marco Rubio's Term End";
-        r5.committees = "Committees: \n    Committee 1\n    Committee 2\n    Committee 3";
-        r5.recentBills = "Recent Bills: \n    List of Recent Bills Here";
-        r5.picture = R.drawable.sen2bpic;
-        bradfordReps.add(r5);
-
-        Representative r6 = new Representative();
-        r6.name = "Ted Yoho";
-        r6.position = "Representative";
-        r6.party = "Republican Party";
-        r6.email = "Email: Ted Yoho's Email";
-        r6.website = "Website: Ted Yoho's Website";
-        r6.lastTweet = "Last Tweet: Ted Yoho's Last Tweet";
-        r6.termEnd = "Term Ends: Ted Yoho's Term End";
-        r6.committees = "Committees: \n    Committee 1\n    Committee 2\n    Committee 3";
-        r6.recentBills = "Recent Bills: \n    List of Recent Bills Here";
-        r6.picture = R.drawable.rep2pic;
-        bradfordReps.add(r6);
-
-        repMapping.put(l2, bradfordReps);
     }
 
     @Override
     protected void onStart() {
         super.onStart();
+        mGoogleApiClient.connect();
         LocalBroadcastManager.getInstance(this).registerReceiver((shakeReceiver),
                 new IntentFilter("Shake")
         );
@@ -232,6 +216,7 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onStop() {
+        mGoogleApiClient.disconnect();
         LocalBroadcastManager.getInstance(this).unregisterReceiver(shakeReceiver);
         super.onStop();
     }
@@ -257,4 +242,15 @@ public class MainActivity extends AppCompatActivity {
 
         return super.onOptionsItemSelected(item);
     }
+
+    @Override
+    public void onConnected(Bundle connectionHint) {
+        // We are now connected!
+    }
+
+    @Override
+    public void onConnectionSuspended(int cause) {
+        // We are not connected anymore!
+    }
+
 }

@@ -10,25 +10,40 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
     tools:context="com.example.chatdog.prog2.MainActivity"
-    tools:showIn="@layout/activity_main">
+    tools:showIn="@layout/activity_main"
+    android:background="#3f51b5">
 
     <EditText
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:inputType="number"
         android:ems="10"
+        android:textColorHint="#c0c4d9"
         android:id="@+id/zipCode"
+        android:background="#303f9f"
+        android:autoText="true"
+        android:textColor="#ffffff"
+        android:textSize="36dp"
+        android:textAlignment="center"
+        android:typeface="serif"
+        android:layout_above="@+id/textView"
         android:layout_alignParentStart="true"
-        android:layout_alignParentTop="true" />
+        android:layout_toStartOf="@+id/goButton"
+        android:paddingRight="5dp" />
 
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Go!"
         android:id="@+id/goButton"
-        android:layout_below="@+id/zipCode"
-        android:layout_alignParentStart="true"
-        android:onClick="goButtonOnClick" />
+        android:onClick="goButtonOnClick"
+        android:typeface="serif"
+        android:textAllCaps="false"
+        android:textColor="#3949ab"
+        android:textSize="24dp"
+        android:layout_above="@+id/textView"
+        android:layout_alignEnd="@+id/imageView2"
+        android:background="#e8eaf6" />
 
     <Button
         android:layout_width="wrap_content"
@@ -36,8 +51,14 @@
         android:text="Detect My Location"
         android:id="@+id/detectLocationButton"
         android:onClick="detectLocationButtonOnClick"
-        android:layout_below="@+id/goButton"
-        android:layout_alignParentStart="true" />
+        android:textAllCaps="false"
+        android:typeface="serif"
+        android:textSize="24dp"
+        android:background="#e8eaf6"
+        android:textColor="#3949ab"
+        android:layout_alignParentBottom="true"
+        android:layout_alignStart="@+id/zipCode"
+        android:layout_alignParentEnd="true" />
 
     <ImageView
         android:layout_width="wrap_content"
@@ -45,5 +66,40 @@
         android:id="@+id/imageView"
         android:layout_centerVertical="true"
         android:layout_alignParentStart="true" />
+
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/imageView2"
+        android:src="@drawable/logo3"
+        android:layout_above="@+id/textView2"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="52dp" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Or"
+        android:id="@+id/textView"
+        android:layout_above="@+id/detectLocationButton"
+        android:layout_centerHorizontal="true"
+        android:textSize="20dp"
+        android:textColor="#ffffff"
+        android:typeface="serif"
+        android:paddingBottom="5dp"
+        android:paddingTop="5dp" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Enter Zip Code"
+        android:id="@+id/textView2"
+        android:textSize="20dp"
+        android:textColor="#ffffff"
+        android:typeface="serif"
+        android:paddingBottom="5dp"
+        android:paddingTop="5dp"
+        android:layout_above="@+id/goButton"
+        android:layout_toEndOf="@+id/imageView" />
 
 </RelativeLayout>

@@ -29,11 +29,16 @@ public class RepFragment extends Fragment {
         int index = args.getInt("repIndex");
         Representative r = MainActivity.repList.get(index);
         ((TextView) rootView.findViewById(R.id.repName)).setText(r.getTitle());
-        ((ImageView) rootView.findViewById(R.id.repPic)).setImageResource(r.picture);
+        ((ImageView) rootView.findViewById(R.id.repPic)).setImageBitmap(r.picture);
         ((TextView) rootView.findViewById(R.id.repParty)).setText(r.party);
         ((TextView) rootView.findViewById(R.id.repEmail)).setText(r.email);
         ((TextView) rootView.findViewById(R.id.repWebsite)).setText(r.website);
-        ((TextView) rootView.findViewById(R.id.repTweet)).setText(r.lastTweet);
+        if(r.lastTweet == null || r.lastTweet.isEmpty()) {
+            ((TextView) rootView.findViewById(R.id.repTweet)).setText("No Tweets Found");
+        } else{
+            ((TextView) rootView.findViewById(R.id.repTweet)).setText(r.lastTweet);
+        }
+
         ((TextView) rootView.findViewById(R.id.repTerm)).setText(r.termEnd);
         ((TextView) rootView.findViewById(R.id.repCommittee)).setText(r.committees);
         ((TextView) rootView.findViewById(R.id.repBills)).setText(r.recentBills);

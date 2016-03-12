@@ -9,6 +9,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.pkmmte.view.CircularImageView;
@@ -55,9 +56,11 @@ public class WearRepFragment extends Fragment {
                     getActivity().startActivity(sendIntent);
                 }
             });
+            ((ImageView)(rootView.findViewById(R.id.logoImage))).setPadding(0,0,0,0);
         } else{
             rootView.findViewById(R.id.voteButton).setVisibility(View.GONE);
-            ((CircularImageView)(rootView.findViewById(R.id.repPicture))).setImageResource(R.drawable.capitol);
+            ((CircularImageView)(rootView.findViewById(R.id.repPicture))).setImageResource(R.drawable.capitol2);
+            ((ImageView)(rootView.findViewById(R.id.logoImage))).setImageResource(R.drawable.represent3);
         }
         return rootView;
     }

@@ -57,13 +57,16 @@ public class PhoneToWatchService extends Service {
     public int onStartCommand(Intent intent, int flags, int startId) {
         Bundle extras = intent.getExtras();
         final String info = extras.getString("REP_INFO");
-        final String picInfo = extras.getString("REP_PIC");
-        final Location l = MainActivity.locTable.get(MainActivity.currLocation);
+        final int numPics = extras.getInt("NUM_PICS");
+        final Location l = MainActivity.currLocation;
+        if(l == null){
+            return START_NOT_STICKY;
+        }
         new Thread(new Runnable() {
             @Override
             public void run() {
                 mApiClient.connect();
-                sendData(picInfo, info, l);
+                sendData(info, numPics, l);
             }
         }).start();
         return START_STICKY;
@@ -73,12 +76,10 @@ public class PhoneToWatchService extends Service {
     public IBinder onBind(Intent intent) {
         return null;
     }
-
-    private void sendData(final String picInfo, final String info, final Location locInfo){
+    private void sendData(final String info, final int numPics, final Location locInfo){
         new Thread( new Runnable() {
             @Override
             public void run() {
-                String[] picInfoElements = picInfo.split(";");
                 PutDataMapRequest dataMap = PutDataMapRequest.create("/Represent");
                 dataMap.getDataMap().putString("Info", info);
                 dataMap.getDataMap().putString("County", locInfo.name);
@@ -86,13 +87,16 @@ public class PhoneToWatchService extends Service {
                 dataMap.getDataMap().putDouble("RVote", locInfo.romneyVote);
                 dataMap.getDataMap().putLong("Time", new Date().getTime());
 
-                dataMap.getDataMap().putInt("NumImages", picInfoElements.length);
-                for( int i = 0; i < picInfoElements.length; i++) {
-                    int picID = Integer.parseInt(picInfoElements[i]);
-                    Bitmap bitmap = BitmapFactory.decodeResource(getResources(), picID);
-                    Asset asset = createAssetFromBitmap(bitmap);
-                    dataMap.getDataMap().putAsset("Image" + Integer.toString(i), asset);
+                for(int j = 0; j < MainActivity.repList.size(); j++) {
+                    try {
+                        Bitmap bitmap = MainActivity.repList.get(j).picture;
+                        Asset asset = createAssetFromBitmap(bitmap);
+                        dataMap.getDataMap().putAsset("Image" + Integer.toString(j), asset);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
                 }
+                dataMap.getDataMap().putInt("NumImages", numPics);
 
                 PutDataRequest request = dataMap.asPutDataRequest();
                 Log.w("T", "Sending Request");

@@ -18,7 +18,7 @@ public class WearCollectionPagerAdapter extends FragmentStatePagerAdapter {
         Fragment fragment = new WearRepFragment();
         Bundle args = new Bundle();
         if(MainActivity.repList.isEmpty()){
-            args.putString("RepID", "Represent!");
+            args.putString("RepID", "");
             args.putBoolean("Vote Button", false);
         } else {
             args.putString("RepID", MainActivity.repList.get(i));
