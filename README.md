@@ -19,8 +19,8 @@ See [Prog2C Demo] (https://youtu.be/-X8NwTZLtPc)
 <img src="screenshots/MobileCongressional.PNG" height="400" alt="Screenshot"/>
 <img src="screenshots/MobileCongressDetails.PNG" height="400" alt="Screenshot"/>
 <img src="screenshots/WearMain.PNG" height="200" alt="Screenshot"/>
-<img src="screenshots/WearCongressional.PNG" height="400" alt="Screenshot"/>
-<img src="screenshots/Wear2012Vote.PNG" height="400" alt="Screenshot"/>
+<img src="screenshots/WearCongressional.PNG" height="200" alt="Screenshot"/>
+<img src="screenshots/Wear2012Vote.PNG" height="200" alt="Screenshot"/>
 
 
 ## Acknowledgments
